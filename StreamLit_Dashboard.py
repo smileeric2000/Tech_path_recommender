@@ -16,17 +16,17 @@
 # 📚 Predefined learning paths dataset (you'll create this)
 # 
 # 🔍 Optional: LLM or Flan-T5 for suggesting learning goals
-learning_recommender/
-│
-├── app.py                   # Main Streamlit app
-├── data/
-│   └── learning_paths.json  # Skills mapped to paths
-├── utils/
-│   └── parser.py            # Resume parser
-│   └── recommender.py       # Recommender logic
-├── sample_resume.txt
-├── requirements.txt
-└── README.md
+#learning_recommender/
+#│
+#├── app.py                   # Main Streamlit app
+#├── data/
+#│   └── learning_paths.json  # Skills mapped to paths
+#├── utils/
+#│   └── parser.py            # Resume parser
+#│   └── recommender.py       # Recommender logic
+#├── sample_resume.txt
+#├── requirements.txt
+#└── README.md
 
 # #### Define Learning Paths
 
