@@ -3,3 +3,6 @@ fpdf
 requests
 torch
 transformers
+openai
+scikit-learn
+pandas
