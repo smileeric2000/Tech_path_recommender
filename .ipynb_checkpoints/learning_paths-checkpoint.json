@@ -1,0 +1,39 @@
+{
+  "python": {
+    "resources": [
+      {
+        "title": "Complete Python for Beginners",
+        "platform": "Coursera",
+        "time_estimate": "20 hours",
+        "link": "https://www.coursera.org/learn/python"
+      },
+      {
+        "title": "Automate the Boring Stuff with Python",
+        "platform": "Book",
+        "time_estimate": "15 hours",
+        "link": "https://automatetheboringstuff.com/"
+      }
+    ],
+    "prerequisites": []
+  },
+  "machine learning": {
+    "resources": [
+      {
+        "title": "Machine Learning by Andrew Ng",
+        "platform": "Coursera",
+        "time_estimate": "55 hours",
+        "link": "https://www.coursera.org/learn/machine-learning"
+      },
+      {
+        "title": "Hands-On Machine Learning",
+        "platform": "Book",
+        "time_estimate": "40 hours",
+        "link": "https://www.oreilly.com/library/view/hands-on-machine-learning/9781491962282/"
+      }
+    ],
+    "prerequisites": [
+      "python",
+      "data science"
+    ]
+  }
+}
