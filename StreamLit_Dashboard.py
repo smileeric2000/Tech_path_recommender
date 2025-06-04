@@ -1,3 +1,17 @@
+#Import necessary libraries and dependencies
+import streamlit as st
+from utils.parser import extract_skills
+from utils.recommender import recommend_paths
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
+from pdf_generator import create_pdf_report, fetch_coursera_courses, generate_course_recommendations
+from datasets import load_dataset
+import json
+import requests
+from fpdf import FPDF
+
+
+
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -33,7 +47,7 @@
 # In[1]:
 
 
-import json
+
 text = {
   "python": {
     "resources": [
@@ -73,8 +87,8 @@ text = {
 
 
 # Save to JSON
-with open("learning_paths.json", "w") as f:
-    json.dump(text, f, indent=2)
+# with open("learning_paths.json", "w") as f:
+#     json.dump(text, f, indent=2)
 
 
 # #### Step 2 Resume or Skill Input
@@ -86,10 +100,8 @@ with open("learning_paths.json", "w") as f:
 # In[2]:
 
 
-#Import necessary libraries and dependencies
-import streamlit as st
-from utils.parser import extract_skills
-from utils.recommender import recommend_paths
+
+
 
 
 # NOTE :
@@ -127,8 +139,12 @@ option = st.radio("Choose Input Type", ["Upload Resume", "Select Skills"])
 
 if option == "Upload Resume":
     uploaded_file = st.file_uploader("Upload your resume", type=["pdf", "txt"])
+
     if uploaded_file:
-        skills = extract_skills(uploaded_file)
+        #Read file bytes and decode to string
+        text = uploaded_file.read().decode("latin-1")
+        #Pass the text content
+        skills = extract_skills(text)
         st.write("**Extracted Skills:**", skills)
 
 elif option == "Select Skills":
@@ -149,7 +165,6 @@ if skills:
 # In[10]:
 
 
-import json
 
 def recommend_paths(user_skills):
     with open("data/learning_paths.json", "r") as f:
@@ -182,122 +197,89 @@ def recommend_paths(user_skills):
 # 
 #     
 #     Input: user skills + recommended learning path.
-#     
+#
 #     Output: list of course names + short description.
 
-# ##### Coursera API fetch function
-
-# In[11]:
+###### Coursera API fetch function
 
 
-import requests
 
-def fetch_coursera_courses(query, limit=5):
-    """
-    Fetch top courses from Coursera matching the query.
-    """
-    url = "https://api.coursera.org/api/courses.v1"
-    params = {
-        "q": "search",
-        "query": query,
-        "limit": limit,
-        "fields": "name,description,slug"
-    }
-    response = requests.get(url, params=params)
-    data = response.json()
-
-    courses = []
-    for course in data.get("elements", []):
-        name = course.get("name")
-        slug = course.get("slug")
-        url = f"https://www.coursera.org/learn/{slug}" if slug else ""
-        courses.append({"name": name, "url": url})
-    return courses
-
-
-# ##### OpenAI GPT API Integration
-
-# In[12]:
-
-
-# #set OpenAI API key environment variables 
-
-# import openai
-# import os
-
-# openai.api_key = os.getenv("OPENAI_API_KEY")  # Or set directly here
-
-# def generate_course_recommendations(user_skills, learning_path, experience_level):
-#     prompt = f"""
-#     You are a helpful learning advisor.
-
-#     User has skills: {', '.join(user_skills)}.
-#     They want to learn: {learning_path}.
-#     Their experience level is: {experience_level}.
-
-#     Suggest 3 online courses (with titles) suitable for this user on platforms like Coursera, EdX, or Udemy.
-#     Provide short descriptions for each course.
+# def fetch_coursera_courses(query, limit=5):
 #     """
+#     Fetch top courses from Coursera matching the query.
+#     """
+#     url = "https://api.coursera.org/api/courses.v1"
+#     params = {
+#         "q": "search",
+#         "query": query,
+#         "limit": limit,
+#         "fields": "name,description,slug"
+#     }
+#     response = requests.get(url, params=params)
+#     data = response.json()
 
-#     response = openai.ChatCompletion.create(
-#         model="gpt-4o-mini",
-#         messages=[{"role": "user", "content": prompt}],
-#         temperature=0.7,
-#         max_tokens=300,
-#     )
-
-#     return response.choices[0].message.content.strip()
-
-
-# ##### PDF Export with fpdf
-
-# In[13]:
-
-
-from fpdf import FPDF
-
-def create_pdf_report(user_skills, experience_level, recommended_paths, course_recommendations):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, "Personalized Learning Path Report", ln=True)
-    pdf.set_font("Arial", "", 12)
-    pdf.cell(0, 10, f"Skills: {', '.join(user_skills)}", ln=True)
-    pdf.cell(0, 10, f"Experience Level: {experience_level}", ln=True)
-    pdf.ln(10)
-
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "Recommended Learning Paths:", ln=True)
-    pdf.set_font("Arial", "", 12)
-    for path in recommended_paths:
-        pdf.cell(0, 10, f"- {path}", ln=True)
-
-    pdf.ln(10)
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "Course Recommendations:", ln=True)
-    pdf.set_font("Arial", "", 12)
-    for line in course_recommendations.split("\n"):
-        pdf.cell(0, 10, line, ln=True)
-
-    filename = "learning_path_report.pdf"
-    pdf.output(filename)
-    return filename
+#     courses = []
+#     for course in data.get("elements", []):
+#         name = course.get("name")
+#         slug = course.get("slug")
+#         url = f"https://www.coursera.org/learn/{slug}" if slug else ""
+#         courses.append({"name": name, "url": url})
+#     return courses
 
 
-# ##  Streamlit Full App Example (app.py)
+#AI Integration
+
+def generate_course_recommendations(user_skills, learning_path, experience_level):
+    return generate_course_recommendations(user_skills, learning_path, experience_level)
+
+
+
+
+# def create_pdf_report(user_skills, experience_level, recommended_paths, course_recommendations):
+#     pdf = FPDF()
+#     pdf.add_page()
+#     pdf.set_font("Arial", "B", 16)
+#     pdf.cell(0, 10, "Personalized Learning Path Report", ln=True)
+#     pdf.set_font("Arial", "", 12)
+#     pdf.cell(0, 10, f"Skills: {', '.join(user_skills)}", ln=True)
+#     pdf.cell(0, 10, f"Experience Level: {experience_level}", ln=True)
+#     pdf.ln(10)
+
+#     pdf.set_font("Arial", "B", 14)
+#     pdf.cell(0, 10, "Recommended Learning Paths:", ln=True)
+#     pdf.set_font("Arial", "", 12)
+#     for path in recommended_paths:
+#         pdf.cell(0, 10, f"- {path}", ln=True)
+
+#     pdf.ln(10)
+#     pdf.set_font("Arial", "B", 14)
+#     pdf.cell(0, 10, "Course Recommendations:", ln=True)
+#     pdf.set_font("Arial", "", 12)
+#     for line in course_recommendations.split("\n"):
+#         pdf.cell(0, 10, line, ln=True)
+
+#     filename = "learning_path_report.pdf"
+#     pdf.output(filename)
+#     return filename
+
+
+###  Streamlit Full App Example (app.py)
 
 # In[14]:
 
+model_path = r"C:\Users\USER\data_science\Classes_with_SirPsalms\Deep_learning\Transformer_based_NLP\Project_Pulse\my_fine_tuned_model"
 
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
-import torch
-from pdf_generator import create_pdf_report, fetch_coursera_courses, generate_course_recommendations
+#Define torch device type
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load GPT-2 model and tokenizer
 @st.cache_resource
 def load_gpt2_model():
-    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-    model = GPT2LMHeadModel.from_pretrained("gpt2")
+    tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False)
+    model = AutoModelForCausalLM.from_pretrained(model_path)
+    #PAD TOKENS
+    tokenizer.pad_token = tokenizer.eos_token  
+
     model.eval()
     return tokenizer, model
 
@@ -311,23 +293,37 @@ def load_learning_paths():
 def extract_skills_from_text(text, keywords):
     return [kw for kw in keywords if re.search(rf"\b{kw}\b", text, re.IGNORECASE)]
 
-def gpt2_generate(prompt, max_length=100):
-    input_ids = tokenizer.encode(prompt, return_tensors="pt")
+def gpt2_generate(prompt, max_length=200):
+    input_ids = tokenizer.encode(prompt, return_tensors="pt", padding = True).to(device)
+    st.write("This is before GPT text")
     with torch.no_grad():
         output = model.generate(
             input_ids,
-            max_length=input_ids.shape[1] + max_length,
-            pad_token_id=tokenizer.eos_token_id,
-            do_sample=True,
+            max_length = max_length,
+            do_sample = True,
             top_k=50,
             top_p=0.95,
-            temperature=0.7
+            temperature=0.75,
+            pad_token_id=tokenizer.eos_token_id
         )
-    generated = tokenizer.decode(output[0], skip_special_tokens=True)
-    return generated[len(prompt):].strip().split("User:")[0].strip()
+    
+        #decode bot reponse
+        #DEBUGGER
+        raw_generated = tokenizer.decode(output[0], skip_special_tokens=True)
+        #DEBUGGER
+        #st.write("Raw GPT output:", raw_generated)  # Debug print
+
+        
+        # Process the generated text: remove the prompt portion and anything after "User:"
+        processed = raw_generated[len(prompt):].strip().split("User:")[0].strip()
+        st.write("Processed GPT output:", processed)  # Debug print
+        st.write("This is after GPT response")
+        return processed
+        # generated = tokenizer.decode(output[0], skip_special_tokens=True)
+        # return generated[len(prompt):].strip().split("User:")[0].strip()
 
 def main():
-    st.title("📘 Personalized Learning Path Recommender (Offline GPT-2 Version)")
+    st.title("📘 Personalized Learning Path Recommender")
 
     learning_paths = load_learning_paths()
     all_skills = sorted({skill for skills in learning_paths.values() for skill in skills})
@@ -367,8 +363,9 @@ def main():
                     f"Their experience level is {experience_level}.\nCourses:"
                 )
                 course_recs = gpt2_generate(prompt)
+
                 st.markdown("### 📚 Course Recommendations:")
-                st.write(course_recs)
+                st.write(f"GPT response :{course_recs}")  #Part to output GPT's resonse
 
                 courses = fetch_coursera_courses(recommended_paths[0])
                 st.markdown("### 🔎 Real Coursera Courses:")

@@ -1,6 +1,6 @@
 import re
 
-# Define a list of known skills
+#Define a list of known skills
 KNOWN_SKILLS = [
     'python', 'java', 'c++', 'javascript', 'html', 'css',
     'machine learning', 'deep learning', 'data science',
@@ -15,10 +15,10 @@ def extract_skills(text):
     extracted = []
 
     for skill in KNOWN_SKILLS:
-        # Match full skill phrase using word boundaries
+        #Match full skill phrase using word boundaries
         if re.search(r'\b' + re.escape(skill) + r'\b', text):
             extracted.append(skill)
 
     return extracted
 
-4+1
+

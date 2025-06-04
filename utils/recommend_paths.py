@@ -15,7 +15,7 @@ def recommend_paths(extracted_skills, json_file="data/learning_paths.json"):
     
     Returns a dictionary with each skill mapped to details.
     """
-   learning_paths = load_learning_paths(json_file)
+    learning_paths = load_learning_paths(json_file)
     recommendations = {}
     next_skills = set()
 
