@@ -1,7 +1,10 @@
 #Import necessary libraries and dependencies
 import streamlit as st
+st.set_page_config(page_title="Learning Path Recommender", layout="wide")
+
+
 from utils.parser import extract_skills
-from utils.recommender import recommend_paths
+from utils.recommend_paths import recommend_paths
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 from pdf_generator import create_pdf_report, fetch_coursera_courses, generate_course_recommendations
@@ -9,6 +12,7 @@ from datasets import load_dataset
 import json
 import requests
 from fpdf import FPDF
+
 
 
 
@@ -48,42 +52,42 @@ from fpdf import FPDF
 
 
 
-text = {
-  "python": {
-    "resources": [
-      {
-        "title": "Complete Python for Beginners",
-        "platform": "Coursera",
-        "time_estimate": "20 hours",
-        "link": "https://www.coursera.org/learn/python"
-      },
-      {
-        "title": "Automate the Boring Stuff with Python",
-        "platform": "Book",
-        "time_estimate": "15 hours",
-        "link": "https://automatetheboringstuff.com/"
-      }
-    ],
-    "prerequisites": []
-  },
-  "machine learning": {
-    "resources": [
-      {
-        "title": "Machine Learning by Andrew Ng",
-        "platform": "Coursera",
-        "time_estimate": "55 hours",
-        "link": "https://www.coursera.org/learn/machine-learning"
-      },
-      {
-        "title": "Hands-On Machine Learning",
-        "platform": "Book",
-        "time_estimate": "40 hours",
-        "link": "https://www.oreilly.com/library/view/hands-on-machine-learning/9781491962282/"
-      }
-    ],
-    "prerequisites": ["python", "data science"]
-  }
-}
+# text = {
+#   "python": {
+#     "resources": [
+#       {
+#         "title": "Complete Python for Beginners",
+#         "platform": "Coursera",
+#         "time_estimate": "20 hours",
+#         "link": "https://www.coursera.org/learn/python"
+#       },
+#       {
+#         "title": "Automate the Boring Stuff with Python",
+#         "platform": "Book",
+#         "time_estimate": "15 hours",
+#         "link": "https://automatetheboringstuff.com/"
+#       }
+#     ],
+#     "prerequisites": []
+#   },
+#   "machine learning": {
+#     "resources": [
+#       {
+#         "title": "Machine Learning by Andrew Ng",
+#         "platform": "Coursera",
+#         "time_estimate": "55 hours",
+#         "link": "https://www.coursera.org/learn/machine-learning"
+#       },
+#       {
+#         "title": "Hands-On Machine Learning",
+#         "platform": "Book",
+#         "time_estimate": "40 hours",
+#         "link": "https://www.oreilly.com/library/view/hands-on-machine-learning/9781491962282/"
+#       }
+#     ],
+#     "prerequisites": ["python", "data science"]
+#   }
+# }
 
 
 # Save to JSON
@@ -130,32 +134,35 @@ text = {
 
 # In[9]:
 
+###########RECENT COMMENT##
+# st.title("📘 Personalized Learning Path Recommender")
 
-st.title("📘 Personalized Learning Path Recommender")
+# skills = []  #Initialize skills <<empty list of skills>>
 
-skills = []  #Initialize skills <<empty list of skills>>
+# option = st.radio("Choose Input Type", ["Upload Resume", "Select Skills"])
 
-option = st.radio("Choose Input Type", ["Upload Resume", "Select Skills"])
+# if option == "Upload Resume":
+#     uploaded_file = st.file_uploader("Upload your resume", type=["pdf", "txt"])
 
-if option == "Upload Resume":
-    uploaded_file = st.file_uploader("Upload your resume", type=["pdf", "txt"])
+#     if uploaded_file:
+#         #Read file bytes and decode to string
+#         text = uploaded_file.read().decode("latin-1")
+#         #Pass the text content
+#         skills = extract_skills(text)
+#         st.write("**Extracted Skills:**", skills)
 
-    if uploaded_file:
-        #Read file bytes and decode to string
-        text = uploaded_file.read().decode("latin-1")
-        #Pass the text content
-        skills = extract_skills(text)
-        st.write("**Extracted Skills:**", skills)
+# elif option == "Select Skills":
+#     all_skills = ["Python", "SQL", "Pandas", "Scikit-learn", "Spark", "Airflow", "Numpy", "Transformers"]
+#     skills = st.multiselect("Select your current skills", all_skills)
 
-elif option == "Select Skills":
-    all_skills = ["Python", "SQL", "Pandas", "Scikit-learn", "Spark", "Airflow", "Numpy", "Transformers"]
-    skills = st.multiselect("Select your current skills", all_skills)
+# if skills:
+#     recommendations = recommend_paths(skills)
+#     st.write("### 🎯 Recommended Paths:")
+#     for rec in recommendations:
+#         st.markdown(f"- **{rec}**")
+#####RECENT COMMENT
 
-if skills:
-    recommendations = recommend_paths(skills)
-    st.write("### 🎯 Recommended Paths:")
-    for rec in recommendations:
-        st.markdown(f"- **{rec}**")
+
 
 
 # #### Step 3 Extract Skills (NLP Resume Parser)
@@ -166,17 +173,17 @@ if skills:
 
 
 
-def recommend_paths(user_skills):
-    with open("data/learning_paths.json", "r") as f:
-        paths = json.load(f)
+# def recommend_paths(user_skills):
+#     with open("data/learning_paths.json", "r") as f:
+#         paths = json.load(f)
 
-    scores = {}
-    for path, details in paths.items():
-        skill_list = details.get("prerequisites", [])
-        overlap = set(user_skills).intersection(set(skill_list))
-        scores[path] = len(overlap) / len(skill_list) if skill_list else 0
+#     scores = {}
+#     for path, details in paths.items():
+#         skill_list = details.get("prerequisites", [])
+#         overlap = set(user_skills).intersection(set(skill_list))
+#         scores[path] = len(overlap) / len(skill_list) if skill_list else 0
 
-    return sorted(scores, key=scores.get, reverse=True)
+#     return sorted(scores, key=scores.get, reverse=True)
 
 
 # #### Step 6: (Optional) Suggest Next Skills to Learn
@@ -290,8 +297,8 @@ def load_learning_paths():
     with open("data/learning_paths.json", "r") as f:
         return json.load(f)
 
-def extract_skills_from_text(text, keywords):
-    return [kw for kw in keywords if re.search(rf"\b{kw}\b", text, re.IGNORECASE)]
+# def extract_skills_from_text(text, keywords):
+#     return [kw for kw in keywords if re.search(rf"\b{kw}\b", text, re.IGNORECASE)]
 
 def gpt2_generate(prompt, max_length=200):
     input_ids = tokenizer.encode(prompt, return_tensors="pt", padding = True).to(device)
@@ -323,10 +330,11 @@ def gpt2_generate(prompt, max_length=200):
         # return generated[len(prompt):].strip().split("User:")[0].strip()
 
 def main():
+
     st.title("📘 Personalized Learning Path Recommender")
 
     learning_paths = load_learning_paths()
-    all_skills = sorted({skill for skills in learning_paths.values() for skill in skills})
+    all_skills = sorted(learning_paths)
 
     input_type = st.radio("Choose input type", ["Upload Resume", "Select Skills"])
     experience_level = st.selectbox("Select your experience level", ["Beginner", "Intermediate", "Advanced"])
@@ -334,43 +342,63 @@ def main():
     user_skills = []
 
     if input_type == "Upload Resume":
-        uploaded_file = st.file_uploader("Upload your resume (.txt only)", type=["txt"])
+        uploaded_file = st.file_uploader("Upload your resume (.txt,or pdf or docx only)", type=["txt", "pdf", "docx"])
         if uploaded_file:
-            text = uploaded_file.read().decode("utf-8")
-            user_skills = extract_skills_from_text(text, all_skills)
-            st.write("### Extracted Skills:")
-            st.write(user_skills if user_skills else "No known skills detected. Try manual selection.")
+            text = uploaded_file.read().decode("latin-1")
+            user_skills = extract_skills(text)
+            st.write("### Extracted Skills")
+            st.write(f"USER SKILLS: {user_skills}" if user_skills else "No known skills detected. Try manual selection.")
 
     elif input_type == "Select Skills":
         user_skills = st.multiselect("Select your current skills", all_skills)
-
+        st.write(f"USER SKILLS : {user_skills}")
     if user_skills:
-        scores = {}
-        for path, skills in learning_paths.items():
-            overlap = set(user_skills).intersection(skills)
-            scores[path] = len(overlap) / len(skills)
-        recommended_paths = sorted(scores, key=scores.get, reverse=True)
+        st.markdown(f"### 🔍 Fetching Coursera courses for: {user_skills}")
+        courses = fetch_coursera_courses(user_skills)
 
-        st.write("### 🎯 Recommended Learning Paths:")
-        for path in recommended_paths:
-            st.markdown(f"**{path}** — Skills: {', '.join(learning_paths[path])}")
+        if courses:
+            st.markdown("### 📚 Coursera Course Recommendations:")
+            for course in courses:
+                st.markdown(f"- [{course['name']}]({course['url']})")
 
         if st.button("Get Course Recommendations"):
             with st.spinner("Generating personalized suggestions..."):
+                learning_focus = user_skills[0] if user_skills else "a relevant topic"
                 prompt = (
+                    f"You are a course advisor.\n"
                     f"Suggest personalized courses for someone with the following skills: {', '.join(user_skills)}. "
-                    f"The recommended learning path is: {recommended_paths[0]}. "
+                    f"The recommended learning path is: {user_skills[0]}. "
                     f"Their experience level is {experience_level}.\nCourses:"
                 )
                 course_recs = gpt2_generate(prompt)
 
                 st.markdown("### 📚 Course Recommendations:")
                 st.write(f"GPT response :{course_recs}")  #Part to output GPT's resonse
+                #######++++NEW++++#######
+                topics = [t.strip().lower() for t in course_recs.split(",") if t.strip()]
+                valid_topics = list(set(topics))
+                valid_topics = [t for t in topics if len(t) > 2 and not t.startswith("ai/")]
+               
 
-                courses = fetch_coursera_courses(recommended_paths[0])
-                st.markdown("### 🔎 Real Coursera Courses:")
-                for course in courses:
-                    st.markdown(f"- [{course['name']}]({course['url']})")
+                all_courses = []
+
+                for topic in valid_topics[:3]:    #limilt to avoid excessive API calls
+                    fetched = fetch_coursera_courses(topic)
+                    all_courses.extend(fetched)
+
+                #DIsplay real coursera course links
+                if all_courses:
+                    st.markdown("###🔎 Real courserabased on GPT topics:")
+                    for course in all_courses:
+                        st.markdown(f"-[{course['name']}]({course['url']})")
+                else:
+                    st.warning("No Coursera course links found.")
+
+                #######++++NEW++++#######
+                # courses = fetch_coursera_courses(recommended_paths[0])
+                # st.markdown("### 🔎 Real Coursera Courses:")
+                # for course in courses:
+                #     st.markdown(f"- [{course['name']}]({course['url']})")
 
                 if st.button("Download PDF Report"):
                     filename = create_pdf_report(user_skills, experience_level, recommended_paths, course_recs)

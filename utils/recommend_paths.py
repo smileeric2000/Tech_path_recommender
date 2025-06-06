@@ -6,7 +6,9 @@ def load_learning_paths(json_file="learning_paths.json"):
 
 
 def recommend_paths(extracted_skills, json_file="data/learning_paths.json"):
-   """
+     
+   
+    """
     Recommend personalized learning paths with:
     - resources for known and next skills,
     - unlearned skills per path,
