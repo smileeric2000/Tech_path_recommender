@@ -13,7 +13,7 @@ def fetch_coursera_courses(query, limit=5):
     """
     Fetch top courses from Coursera matching the query.
     """
-    if not query or not query.strip():
+    if not query:
         return []
     url = "https://api.coursera.org/api/courses.v1"
     params = {
